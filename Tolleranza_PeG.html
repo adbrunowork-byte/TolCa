@@ -1,0 +1,108 @@
+I campi nel calcolatore generato sopra sono già editabili da tastiera: basta cliccare all'interno delle caselle e digitare i numeri.
+
+Per quanto riguarda il link: **no, non c'è un link**.
+
+L'interfaccia che vedi è uno strumento temporaneo integrato direttamente in questa chat, non un sito web ospitato su un server pubblico.
+
+Per avere l'applicazione sempre a disposizione, ecco il codice sorgente completo in un unico file. Ti basta copiarlo, incollarlo in un normale blocco note, salvarlo come `calcolatore.html` e aprirlo con il tuo browser preferito (Chrome, Safari, Edge).
+
+Se in futuro vorrai un link vero e proprio per accedervi dal telefono o condividerlo, potrai caricare gratuitamente questo file su piattaforme di hosting come GitHub Pages o Netlify.
+
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Tolleranza Pesi</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 400px; 
+            margin: 2rem auto; 
+            padding: 1rem; 
+            background-color: #f9f9f9;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label { 
+            display: block; 
+            margin-top: 1rem; 
+            font-weight: bold;
+            color: #333;
+        }
+        input { 
+            width: 100%; 
+            padding: 0.75rem; 
+            margin-top: 0.5rem; 
+            box-sizing: border-box; 
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .result { 
+            margin-top: 2rem; 
+            padding: 1.5rem; 
+            background: #e3f2fd; 
+            border-radius: 8px; 
+            border-left: 4px solid #1976d2;
+        }
+        .result p { 
+            margin: 0.5rem 0; 
+            font-size: 1.1rem;
+            color: #0d47a1;
+        }
+        .result span {
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Calcolatore Pesi</h2>
+        
+        <label>Peso Bolla: 
+            <input type="number" id="pesoBolla" step="any" oninput="calcola()" placeholder="Inserisci valore...">
+        </label>
+        
+        <label>Peso all'Entrata: 
+            <input type="number" id="pesoEntrata" step="any" oninput="calcola()" placeholder="Inserisci valore...">
+        </label>
+        
+        <label>Peso all'Uscita: 
+            <input type="number" id="pesoUscita" step="any" oninput="calcola()" placeholder="Inserisci valore...">
+        </label>
+
+        <div class="result">
+            <p>Delta: <span id="delta">0.00</span></p>
+            <p>Tolleranza: <span id="tolleranza">0.00%</span></p>
+        </div>
+    </div>
+
+    <script>
+        function calcola() {
+            const bolla = parseFloat(document.getElementById('pesoBolla').value);
+            const entrata = parseFloat(document.getElementById('pesoEntrata').value);
+            const uscita = parseFloat(document.getElementById('pesoUscita').value);
+
+            if (!isNaN(bolla) && !isNaN(entrata) && !isNaN(uscita) && bolla !== 0) {
+                const delta = uscita - (entrata + bolla);
+                const tolleranza = (delta / bolla) * 100;
+
+                document.getElementById('delta').innerText = delta.toFixed(2);
+                document.getElementById('tolleranza').innerText = tolleranza.toFixed(2) + '%';
+            } else {
+                document.getElementById('delta').innerText = '0.00';
+                document.getElementById('tolleranza').innerText = '0.00%';
+            }
+        }
+    </script>
+</body>
+</html>
+
+```
