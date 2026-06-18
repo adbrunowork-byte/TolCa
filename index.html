@@ -7,7 +7,7 @@
     <style>
         body { 
             font-family: Arial, sans-serif; 
-            max-width: 400px; 
+            max-width: 450px; 
             margin: 2rem auto; 
             padding: 1rem; 
             background-color: #f9f9f9;
@@ -58,10 +58,47 @@
             font-size: 1.3rem;
             word-break: break-all;
         }
+
+        /* Stili per commento e bottoni di copia */
+        .copy-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .comment-text {
+            font-size: 0.9rem;
+            font-style: italic;
+            margin: 0;
+            flex-grow: 1;
+            padding-right: 10px;
+            color: inherit;
+        }
+        .copy-btn {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .copy-btn:hover {
+            background-color: #115293;
+        }
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
 
+    <!-- RIQUADRO 1: CALCOLATORE PESI -->
     <div class="container">
         <h2>Calcolatore Pesi</h2>
         
@@ -80,9 +117,15 @@
         <div id="result-box" class="result bg-blue">
             <p>Delta: <span id="delta">0.00</span></p>
             <p>Tolleranza: <span id="tolleranza">0.00%</span></p>
+            
+            <div id="comment-section" class="copy-section hidden">
+                <p id="comment-text" class="comment-text"></p>
+                <button class="copy-btn" onclick="copiaTesto('comment-text', this)">Copia</button>
+            </div>
         </div>
     </div>
 
+    <!-- RIQUADRO 2: GENERATORE REFERENCE -->
     <div class="container">
         <h2>Generatore Reference</h2>
         
@@ -91,18 +134,45 @@
         </label>
 
         <div class="result bg-blue">
-            <p>Reference Output:</p>
-            <span id="outputRef">-</span>
+            <p>Reference finale:</p>
+            <div class="copy-section" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">
+                <span id="outputRef">-</span>
+                <button id="btn-copy-ref" class="copy-btn hidden" onclick="copiaTesto('outputRef', this)">Copia</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // Funzione universale per copiare testo
+        function copiaTesto(elementId, btnElement) {
+            const testoDaCopiare = document.getElementById(elementId).innerText;
+            
+            // Creazione di un elemento textarea temporaneo per eseguire la copia (metodo universale)
+            const textAreaTmp = document.createElement("textarea");
+            textAreaTmp.value = testoDaCopiare;
+            document.body.appendChild(textAreaTmp);
+            textAreaTmp.select();
+            document.execCommand("copy");
+            document.body.removeChild(textAreaTmp);
+
+            // Feedback visivo sul bottone
+            const testoOriginale = btnElement.innerText;
+            btnElement.innerText = "Copiato!";
+            btnElement.style.backgroundColor = "#2e7d32"; // Diventa verde
+            
+            setTimeout(() => {
+                btnElement.innerText = testoOriginale;
+                btnElement.style.backgroundColor = ""; // Torna al colore originale
+            }, 2000);
+        }
+
         // Logica Calcolatore Pesi
         function calcola() {
             const bolla = parseFloat(document.getElementById('pesoBolla').value);
             const entrata = parseFloat(document.getElementById('pesoEntrata').value);
             const uscita = parseFloat(document.getElementById('pesoUscita').value);
             const resultBox = document.getElementById('result-box');
+            const commentSection = document.getElementById('comment-section');
 
             if (!isNaN(bolla) && !isNaN(entrata) && !isNaN(uscita) && bolla !== 0) {
                 const delta = uscita - (entrata + bolla);
@@ -111,7 +181,7 @@
                 document.getElementById('delta').innerText = delta.toFixed(2);
 
                 let emoji = '';
-                resultBox.className = 'result';
+                resultBox.className = 'result'; // Resetta le classi
 
                 if (tolleranza >= -1 && tolleranza <= 1) {
                     resultBox.classList.add('bg-green');
@@ -125,10 +195,18 @@
                 }
 
                 document.getElementById('tolleranza').innerText = tolleranza.toFixed(2) + '%' + emoji;
+                
+                // Generazione e visualizzazione commento
+                const commentText = `Peso mancante da SAP, i calcoli manuali riportano un delta = ${delta.toFixed(2)} e una tolleranza percentuale = ${tolleranza.toFixed(2)}%`;
+                document.getElementById('comment-text').innerText = commentText;
+                commentSection.classList.remove('hidden');
+
             } else {
+                // Reset in caso di valori mancanti
                 document.getElementById('delta').innerText = '0.00';
                 document.getElementById('tolleranza').innerText = '0.00%';
                 resultBox.className = 'result bg-blue';
+                commentSection.classList.add('hidden');
             }
         }
 
@@ -136,24 +214,27 @@
         function generaReference() {
             const input = document.getElementById('inputRef').value;
             const outputSpan = document.getElementById('outputRef');
+            const btnCopyRef = document.getElementById('btn-copy-ref');
 
             if (input.trim() === '') {
                 outputSpan.innerText = '-';
+                btnCopyRef.classList.add('hidden');
                 return;
             }
 
-            // Rimuove tutti i caratteri che non sono numeri
+            // Rimuove caratteri non numerici
             const numeriPuliti = input.replace(/[^0-9]/g, '');
 
-            // Ottiene la data odierna nel formato GGMMAA
+            // Ottiene data in formato GGMMAA
             const oggi = new Date();
             const giorno = String(oggi.getDate()).padStart(2, '0');
             const mese = String(oggi.getMonth() + 1).padStart(2, '0');
             const anno = String(oggi.getFullYear()).slice(-2);
             const dataFormattata = giorno + mese + anno;
 
-            // Mostra il risultato combinato
+            // Mostra risultato e bottone
             outputSpan.innerText = numeriPuliti + dataFormattata;
+            btnCopyRef.classList.remove('hidden');
         }
     </script>
 </body>
