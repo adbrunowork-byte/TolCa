@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -19,6 +18,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        h2 { margin-top: 0; }
         label { 
             display: block; 
             margin-top: 1rem; 
@@ -37,14 +37,20 @@
         .result { 
             margin-top: 2rem; 
             padding: 1.5rem; 
-            background: #e3f2fd; 
             border-radius: 8px; 
-            border-left: 4px solid #1976d2;
+            border-left: 4px solid;
+            transition: all 0.3s ease; /* Transizione fluida dei colori */
         }
+        
+        /* Classi colore dinamiche */
+        .bg-blue { background: #e3f2fd; border-left-color: #1976d2; color: #0d47a1; }
+        .bg-green { background: #e8f5e9; border-left-color: #2e7d32; color: #1b5e20; }
+        .bg-yellow { background: #fffde7; border-left-color: #fbc02d; color: #f57f17; }
+        .bg-red { background: #ffebee; border-left-color: #c62828; color: #b71c1c; }
+
         .result p { 
             margin: 0.5rem 0; 
             font-size: 1.1rem;
-            color: #0d47a1;
         }
         .result span {
             font-weight: bold;
@@ -68,7 +74,7 @@
             <input type="number" id="pesoUscita" step="any" oninput="calcola()" placeholder="Inserisci valore...">
         </label>
 
-        <div class="result">
+        <div id="result-box" class="result bg-blue">
             <p>Delta: <span id="delta">0.00</span></p>
             <p>Tolleranza: <span id="tolleranza">0.00%</span></p>
         </div>
@@ -79,20 +85,40 @@
             const bolla = parseFloat(document.getElementById('pesoBolla').value);
             const entrata = parseFloat(document.getElementById('pesoEntrata').value);
             const uscita = parseFloat(document.getElementById('pesoUscita').value);
+            const resultBox = document.getElementById('result-box');
 
             if (!isNaN(bolla) && !isNaN(entrata) && !isNaN(uscita) && bolla !== 0) {
                 const delta = uscita - (entrata + bolla);
                 const tolleranza = (delta / bolla) * 100;
 
+                // Aggiorna il testo del delta
                 document.getElementById('delta').innerText = delta.toFixed(2);
-                document.getElementById('tolleranza').innerText = tolleranza.toFixed(2) + '%';
+
+                let emoji = '';
+                // Resetta le classi del box mantenendo solo quella base
+                resultBox.className = 'result';
+
+                // Logica dei colori e delle emoji
+                if (tolleranza >= -1 && tolleranza <= 1) {
+                    resultBox.classList.add('bg-green');
+                    emoji = ' 👍';
+                } else if (tolleranza >= -3 && tolleranza <= 3) {
+                    resultBox.classList.add('bg-yellow');
+                    emoji = ' ⚠️';
+                } else {
+                    resultBox.classList.add('bg-red');
+                    emoji = ' 🚨';
+                }
+
+                // Aggiorna il testo della tolleranza con la percentuale e l'emoji
+                document.getElementById('tolleranza').innerText = tolleranza.toFixed(2) + '%' + emoji;
             } else {
+                // Se i campi sono vuoti o manca un dato, ripristina i valori iniziali (blu)
                 document.getElementById('delta').innerText = '0.00';
                 document.getElementById('tolleranza').innerText = '0.00%';
+                resultBox.className = 'result bg-blue';
             }
         }
     </script>
 </body>
 </html>
-
-```
