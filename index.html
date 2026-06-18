@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calcolatore Tolleranza Pesi</title>
+    <title>Gestione Pesi e Reference</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -17,6 +17,7 @@
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
         }
         h2 { margin-top: 0; }
         label { 
@@ -39,10 +40,10 @@
             padding: 1.5rem; 
             border-radius: 8px; 
             border-left: 4px solid;
-            transition: all 0.3s ease; /* Transizione fluida dei colori */
+            transition: all 0.3s ease;
         }
         
-        /* Classi colore dinamiche */
+        /* Classi colore */
         .bg-blue { background: #e3f2fd; border-left-color: #1976d2; color: #0d47a1; }
         .bg-green { background: #e8f5e9; border-left-color: #2e7d32; color: #1b5e20; }
         .bg-yellow { background: #fffde7; border-left-color: #fbc02d; color: #f57f17; }
@@ -55,14 +56,16 @@
         .result span {
             font-weight: bold;
             font-size: 1.3rem;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h2>Calcolatore Tolleranza</h2>
+        <h2>Calcolatore Pesi</h2>
         
-        <label>Peso DN: 
+        <label>Peso Bolla: 
             <input type="number" id="pesoBolla" step="any" oninput="calcola()" placeholder="Inserisci valore...">
         </label>
         
@@ -80,7 +83,21 @@
         </div>
     </div>
 
+    <div class="container">
+        <h2>Generatore Reference</h2>
+        
+        <label>Reference originale: 
+            <input type="text" id="inputRef" oninput="generaReference()" placeholder="Es. 12345 o R12345...">
+        </label>
+
+        <div class="result bg-blue">
+            <p>Reference Output:</p>
+            <span id="outputRef">-</span>
+        </div>
+    </div>
+
     <script>
+        // Logica Calcolatore Pesi
         function calcola() {
             const bolla = parseFloat(document.getElementById('pesoBolla').value);
             const entrata = parseFloat(document.getElementById('pesoEntrata').value);
@@ -91,14 +108,11 @@
                 const delta = uscita - (entrata + bolla);
                 const tolleranza = (delta / bolla) * 100;
 
-                // Aggiorna il testo del delta
                 document.getElementById('delta').innerText = delta.toFixed(2);
 
                 let emoji = '';
-                // Resetta le classi del box mantenendo solo quella base
                 resultBox.className = 'result';
 
-                // Logica dei colori e delle emoji
                 if (tolleranza >= -1 && tolleranza <= 1) {
                     resultBox.classList.add('bg-green');
                     emoji = ' 👍';
@@ -110,14 +124,36 @@
                     emoji = ' 🚨';
                 }
 
-                // Aggiorna il testo della tolleranza con la percentuale e l'emoji
                 document.getElementById('tolleranza').innerText = tolleranza.toFixed(2) + '%' + emoji;
             } else {
-                // Se i campi sono vuoti o manca un dato, ripristina i valori iniziali (blu)
                 document.getElementById('delta').innerText = '0.00';
                 document.getElementById('tolleranza').innerText = '0.00%';
                 resultBox.className = 'result bg-blue';
             }
+        }
+
+        // Logica Generatore Reference
+        function generaReference() {
+            const input = document.getElementById('inputRef').value;
+            const outputSpan = document.getElementById('outputRef');
+
+            if (input.trim() === '') {
+                outputSpan.innerText = '-';
+                return;
+            }
+
+            // Rimuove tutti i caratteri che non sono numeri
+            const numeriPuliti = input.replace(/[^0-9]/g, '');
+
+            // Ottiene la data odierna nel formato GGMMAA
+            const oggi = new Date();
+            const giorno = String(oggi.getDate()).padStart(2, '0');
+            const mese = String(oggi.getMonth() + 1).padStart(2, '0');
+            const anno = String(oggi.getFullYear()).slice(-2);
+            const dataFormattata = giorno + mese + anno;
+
+            // Mostra il risultato combinato
+            outputSpan.innerText = numeriPuliti + dataFormattata;
         }
     </script>
 </body>
