@@ -7,18 +7,29 @@
     <style>
         body { 
             font-family: Arial, sans-serif; 
-            max-width: 450px; 
+            max-width: 1000px; /* Aumentato per far stare i due riquadri */
             margin: 2rem auto; 
             padding: 1rem; 
             background-color: #f9f9f9;
         }
+        
+        /* Contenitore principale per affiancare i riquadri */
+        .app-wrapper {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap; /* Va a capo sugli schermi piccoli */
+            align-items: flex-start;
+        }
+
         .container {
+            flex: 1;
+            min-width: 320px; /* Larghezza minima per non schiacciarli troppo */
             background: white;
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
         }
+        
         h2 { margin-top: 0; }
         label { 
             display: block; 
@@ -98,46 +109,48 @@
 </head>
 <body>
 
-    <!-- RIQUADRO 1: CALCOLATORE PESI -->
-    <div class="container">
-        <h2>Calcolatore Pesi</h2>
-        
-        <label>Peso Bolla: 
-            <input type="number" id="pesoBolla" step="any" oninput="calcola()" placeholder="Inserisci valore...">
-        </label>
-        
-        <label>Peso all'Entrata: 
-            <input type="number" id="pesoEntrata" step="any" oninput="calcola()" placeholder="Inserisci valore...">
-        </label>
-        
-        <label>Peso all'Uscita: 
-            <input type="number" id="pesoUscita" step="any" oninput="calcola()" placeholder="Inserisci valore...">
-        </label>
-
-        <div id="result-box" class="result bg-blue">
-            <p>Delta: <span id="delta">0.00</span></p>
-            <p>Tolleranza: <span id="tolleranza">0.00%</span></p>
+    <div class="app-wrapper">
+        <!-- RIQUADRO 1: CALCOLATORE PESI -->
+        <div class="container">
+            <h2>Calcolatore Pesi</h2>
             
-            <div id="comment-section" class="copy-section hidden">
-                <p id="comment-text" class="comment-text"></p>
-                <button class="copy-btn" onclick="copiaTesto('comment-text', this)">Copia</button>
+            <label>Peso Delivery note: 
+                <input type="number" id="pesoBolla" step="any" oninput="calcola()" placeholder="Inserisci valore...">
+            </label>
+            
+            <label>Peso all'Entrata: 
+                <input type="number" id="pesoEntrata" step="any" oninput="calcola()" placeholder="Inserisci valore...">
+            </label>
+            
+            <label>Peso all'Uscita: 
+                <input type="number" id="pesoUscita" step="any" oninput="calcola()" placeholder="Inserisci valore...">
+            </label>
+
+            <div id="result-box" class="result bg-blue">
+                <p>Delta: <span id="delta">0.00</span></p>
+                <p>Tolleranza: <span id="tolleranza">0.00%</span></p>
+                
+                <div id="comment-section" class="copy-section hidden">
+                    <p id="comment-text" class="comment-text"></p>
+                    <button class="copy-btn" onclick="copiaTesto('comment-text', this)">Copia</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- RIQUADRO 2: GENERATORE REFERENCE -->
-    <div class="container">
-        <h2>Generatore Reference</h2>
-        
-        <label>Reference originale: 
-            <input type="text" id="inputRef" oninput="generaReference()" placeholder="Es. 12345 o R12345...">
-        </label>
+        <!-- RIQUADRO 2: GENERATORE REFERENCE -->
+        <div class="container">
+            <h2>Generatore Reference</h2>
+            
+            <label>Reference originale: 
+                <input type="text" id="inputRef" oninput="generaReference()" placeholder="Es. 12345 o R12345...">
+            </label>
 
-        <div class="result bg-blue">
-            <p>Reference finale:</p>
-            <div class="copy-section" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">
-                <span id="outputRef">-</span>
-                <button id="btn-copy-ref" class="copy-btn hidden" onclick="copiaTesto('outputRef', this)">Copia</button>
+            <div class="result bg-blue">
+                <p>Reference finale:</p>
+                <div class="copy-section" style="border-top: none; padding-top: 0; margin-top: 0.5rem;">
+                    <span id="outputRef">-</span>
+                    <button id="btn-copy-ref" class="copy-btn hidden" onclick="copiaTesto('outputRef', this)">Copia</button>
+                </div>
             </div>
         </div>
     </div>
@@ -147,7 +160,6 @@
         function copiaTesto(elementId, btnElement) {
             const testoDaCopiare = document.getElementById(elementId).innerText;
             
-            // Creazione di un elemento textarea temporaneo per eseguire la copia (metodo universale)
             const textAreaTmp = document.createElement("textarea");
             textAreaTmp.value = testoDaCopiare;
             document.body.appendChild(textAreaTmp);
@@ -155,14 +167,13 @@
             document.execCommand("copy");
             document.body.removeChild(textAreaTmp);
 
-            // Feedback visivo sul bottone
             const testoOriginale = btnElement.innerText;
             btnElement.innerText = "Copiato!";
-            btnElement.style.backgroundColor = "#2e7d32"; // Diventa verde
+            btnElement.style.backgroundColor = "#2e7d32"; 
             
             setTimeout(() => {
                 btnElement.innerText = testoOriginale;
-                btnElement.style.backgroundColor = ""; // Torna al colore originale
+                btnElement.style.backgroundColor = ""; 
             }, 2000);
         }
 
@@ -177,16 +188,19 @@
             if (!isNaN(bolla) && !isNaN(entrata) && !isNaN(uscita) && bolla !== 0) {
                 const delta = uscita - (entrata + bolla);
                 const tolleranza = (delta / bolla) * 100;
+                
+                // Uso il valore assoluto per specchiare i comportamenti positivi/negativi
+                const tolleranzaAssoluta = Math.abs(tolleranza);
 
                 document.getElementById('delta').innerText = delta.toFixed(2);
 
                 let emoji = '';
-                resultBox.className = 'result'; // Resetta le classi
+                resultBox.className = 'result'; 
 
-                if (tolleranza >= -1 && tolleranza <= 1) {
+                if (tolleranzaAssoluta <= 1) {
                     resultBox.classList.add('bg-green');
                     emoji = ' 👍';
-                } else if (tolleranza >= -3 && tolleranza <= 3) {
+                } else if (tolleranzaAssoluta > 1 && tolleranzaAssoluta <= 5) {
                     resultBox.classList.add('bg-yellow');
                     emoji = ' ⚠️';
                 } else {
@@ -196,13 +210,11 @@
 
                 document.getElementById('tolleranza').innerText = tolleranza.toFixed(2) + '%' + emoji;
                 
-                // Generazione e visualizzazione commento
                 const commentText = `Peso mancante da SAP, i calcoli manuali riportano un delta = ${delta.toFixed(2)} e una tolleranza percentuale = ${tolleranza.toFixed(2)}%`;
                 document.getElementById('comment-text').innerText = commentText;
                 commentSection.classList.remove('hidden');
 
             } else {
-                // Reset in caso di valori mancanti
                 document.getElementById('delta').innerText = '0.00';
                 document.getElementById('tolleranza').innerText = '0.00%';
                 resultBox.className = 'result bg-blue';
@@ -222,17 +234,14 @@
                 return;
             }
 
-            // Rimuove caratteri non numerici
             const numeriPuliti = input.replace(/[^0-9]/g, '');
 
-            // Ottiene data in formato GGMMAA
             const oggi = new Date();
             const giorno = String(oggi.getDate()).padStart(2, '0');
             const mese = String(oggi.getMonth() + 1).padStart(2, '0');
             const anno = String(oggi.getFullYear()).slice(-2);
             const dataFormattata = giorno + mese + anno;
 
-            // Mostra risultato e bottone
             outputSpan.innerText = numeriPuliti + dataFormattata;
             btnCopyRef.classList.remove('hidden');
         }
